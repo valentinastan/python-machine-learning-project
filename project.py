@@ -7,8 +7,8 @@ import seaborn as sns
 
 #_____________________________________________________________________________________________________________________________________________
 # Se va folosi un subset de date LendingClub DataSet obtinut de aici: https://www.kaggle.com/wordsforthewise/lending-club
-# LendingClub este o companie americană de creditare peer-to-peer, cu sediul în San Francisco, California
-# LendingClub este cea mai mare platformă de creditare peer-to-peer din lume.
+# LendingClub este o companie americană de creditare, cu sediul în San Francisco, California
+
 
 # Scopul proiectului:
 # Avand în vedere date istorice despre împrumuturile acordate, cu informații despre dacă împrumutatul a rămas sau nu 
@@ -22,7 +22,7 @@ def reset_pyplot():
   plt.cla()
   plt.clf()
 
-data_info = pd.read_csv(r'C:\Users\valen\Downloads\python-proj\TensorFlow_FILES\TensorFlow_FILES\DATA\lending_club_info.csv', encoding='utf-8', index_col='LoanStatNew')
+data_info = pd.read_csv(r'C:\Users\valen\Desktop\MASTER\MASTER-an2-sem2\TMWA\TMWA-Proiect\lending_club_info.csv', encoding='utf-8', index_col='LoanStatNew')
 
 #print(data_info.loc['revol_util']['Description'])
 
@@ -31,8 +31,10 @@ def feat_info(col_name):
 
 # feat_info('mort_acc')
 
-df = pd.read_csv(r'C:\Users\valen\Downloads\python-proj\TensorFlow_FILES\TensorFlow_FILES\DATA\lending_club_loan_two.csv', encoding='utf-8')
+df = pd.read_csv(r'C:\Users\valen\Desktop\MASTER\MASTER-an2-sem2\TMWA\TMWA-Proiect\lending_club_loan_two.csv', encoding='utf-8')
 # df.info()
+
+#_____Analiza datelor__________________________________________________________________________________________________________________________________________________________________________________
 
 #countplot
 sns.countplot(x='loan_status', data=df)
@@ -70,10 +72,10 @@ reset_pyplot()
 
 #boxplot pt a vedea relatia dintre the loan_status si Loan Amount
 sns.boxplot(x='loan_status',y='loan_amnt',data=df)
-plt.savefig('5-boxplot.png')
+plt.savefig('5-boxplot.png') #impr mai -> nereturnari mai multe
 reset_pyplot()
 
-#Statistici descritive pt loan amount, grupat dupa loan_status.
+#Statistici descriptive pt loan amount, grupat dupa loan_status.
 descr = df.groupby('loan_status')['loan_amnt'].describe()
 descr.to_csv('Descriptive_Statistics.csv', index=True)
 
@@ -115,18 +117,18 @@ print(df['loan_status'].unique())
 df['loan_repaid'] = df['loan_status'].map({'Fully Paid':1,'Charged Off':0})
 print(df[['loan_repaid','loan_status']])
 
-#Crearea unui bar plot pt a vedea corelatia dintre  numeric features si noua coloana loan_repaid.
+#Crearea unui bar plot pt a vedea corelatia dintre coloane si noua coloana loan_repaid.
 df.corr()['loan_repaid'].sort_values().drop('loan_repaid').plot(kind='bar')
+plt.figure(figsize=(12,4))
 plt.savefig('10-barplot-correllation-loar-repaid')
 reset_pyplot()
 
+#_____Preprocesarea datelor__________________________________________________________________________________________________________________________________________________________________________________
 
-#Data PreProcessing------------------------------------------------
 #Stergere sau adaugare unde sunt date lipsa
 #Stergerea datelor nenecesare sau repetitive
-#Conversia string fautures care s categorical in variabile dummy
-# # Convert categorical string features to dummy variables
-print('-----------------------------Data PrePRocessing-------------------------')
+#Conversia valorilor string care s categorice in variabile dummy
+print('-----------------------------Data PreProcessing-------------------------')
 
 print(df.head())
 #length of the df
@@ -136,8 +138,8 @@ print('-----Length: ', len(df))
 print('-----afisarea nr total de valori lipsa per coloana-----')
 print(df.isnull().sum())
 
-#Conversia acestei serii sa fie afisata in raport procentual in data frame
-print('---Conversia acestei serii sa fie afisata in raport procentual in data frame----')
+#Conversia acestei serii sa fie afisata in raport procentual in dataframe
+print('---Conversia acestei serii sa fie afisata in raport procentual in dataframe----')
 print(100* df.isnull().sum()/len(df))
 
 #Analiza emp_title si emp_length pt a vedea daca le eliminam din df
@@ -154,7 +156,7 @@ print(df['emp_title'].value_counts())
 df = df.drop('emp_title',axis=1)
 
 #Crearea unui count plot pt coloana emp_length. Valorile se sorteaza.
-print(sorted(df['emp_length'].dropna().unique()))
+print(sorted(df['emp_length'].dropna().unique())) #anii de munca
 
 emp_length_order = [ '< 1 year',
   '1 year',
@@ -183,7 +185,7 @@ plt.savefig('12-barplot-emp-length-with-hue')
 reset_pyplot()
 
 # Acest lucru încă nu ne informează cu adevărat dacă există o relație puternică între durata angajării
-# și fiind debitați, aasa ca ne va interesa procentul de debitati pe categorie.
+# și nerambursarea creditului, aasa ca ne va interesa procentul de nerambursare pe categorie.
 # O sa aflam ce procent din persoane din fiecare categorie de angajare nu și-au rambursat împrumutul.
 emp_co = df[df['loan_status']=="Charged Off"].groupby("emp_length").count()['loan_status']
 emp_fp = df[df['loan_status']=="Fully Paid"].groupby("emp_length").count()['loan_status']
@@ -195,7 +197,7 @@ emp_len.plot(kind='bar')
 plt.savefig('13-barplot-won`t pay back ratio')
 reset_pyplot()
 
-# Ratele Charge off sunt f similare cu employment lengths. Voi sterge coloana emp_length.
+# Ratele Charge off sunt f similare cu employment lengths (19 si 20%). Voi sterge coloana emp_length.
 df = df.drop('emp_length',axis=1)
 
 # Vizualizare DataFrame pt a vedea ce coloane inca au date lipsa
@@ -214,7 +216,7 @@ df = df.drop('title',axis=1)
 feat_info('mort_acc')
 
 # Create value_counts pt coloana mort_acc
-print(df['mort_acc'].value_counts())
+print(df['mort_acc'].value_counts()) #avem date null pe 10%din date
 
 #cautam ce col sunt f mult corelate cu col mort_acc
 print("----Correlation with the mort_acc column----")
@@ -222,7 +224,7 @@ print(df.corr()['mort_acc'].sort_values())
 
 # Se pare ca col total_acc se coreleaza cu mort_acc
 # Voi folosi fillna(). Se va grupa dataframe-ul dupa total_acc 
-# si se va calculavaloarea medie pt mort_acc per fiecare intrare total_acc .
+# si se va calcula valoarea medie pt mort_acc per fiecare intrare total_acc .
 
 
 print("----Mean of mort_acc column per total_acc----")
@@ -236,11 +238,6 @@ total_acc_avg = df.groupby('total_acc').mean()['mort_acc']
 print('total_acc_avg: ', total_acc_avg[2.0])
 
 def fill_mort_acc(total_acc,mort_acc):
-  '''
-  Primeste valorile total_acc si mort_acc pt fiecare linie
-  Verifica daca mort_acc e NaN ,daca da, returneaza val medie mort_acc 
-  pt caloarea care corespunde in total_acc pt acea linie.
-  '''
   if np.isnan(mort_acc):
     return total_acc_avg[total_acc]
   else:
@@ -256,7 +253,9 @@ print(df.isnull().sum())
 df = df.dropna()
 print(df.isnull().sum())
 
-print('\n \n _________________Categorical Variables and Dummy Variables_________________________')
+#_____Variabile Categorice si Dummy Variables__________________________________________________________________________________________________________________________________________________________________________________
+
+print('\n \n _________________Variabile Categorice si Dummy Variables_________________________')
 # ne ocupam de valorile string din cauza coloanelor care au categorii.
 
 print('\n', df.select_dtypes(['object']).columns)
@@ -288,7 +287,6 @@ df = df.drop(['verification_status', 'application_type','initial_list_status','p
 df = pd.concat([df,dummies],axis=1)
 print('\n Columns: ', df.columns)
 
-
 # home_ownership
 # Verificarea value_counts pt coloana home_ownership.
 df['home_ownership'].value_counts()
@@ -302,7 +300,6 @@ dummies = pd.get_dummies(df['home_ownership'],drop_first=True)
 df = df.drop('home_ownership',axis=1)
 df = pd.concat([df,dummies],axis=1)
 
-
 # address
 # Crearea unei coloane zip_code din coloana address din data set.
 # Se va extrahe codul postal din coloana adresa
@@ -313,7 +310,7 @@ df = df.drop(['zip_code','address'],axis=1)
 df = pd.concat([df,dummies],axis=1)
 
 # issue_d 
-# Voi sterge aceasta coloana, nefiind utila pt analiza curenta
+# Voi sterge aceasta coloana, nefiind utila pt analiza curenta (nu ne trebuie data aceasta)
 feat_info('issue_d')
 df = df.drop('issue_d',axis=1)
 
@@ -325,6 +322,8 @@ df = df.drop('earliest_cr_line',axis=1)
 
 print(df.select_dtypes(['object']).columns)
 
+
+#____Train Test Split__________________________________________________________________________________________________________________________________________________________________________________
 
 print('\n \n _____________________ Train Test Split_________________________')
 
@@ -341,7 +340,7 @@ y = df['loan_repaid'].values
 
 print(len(df))
 
-# Impartirea intre train/test cu test_size=0.2 si  random_state = 101
+# Impartirea intre train/test cu test_size=0.2 si random_state = 101
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=101)
 
 # Normalizare
@@ -358,7 +357,7 @@ from tensorflow.python.keras.layers import Dense, Activation,Dropout
 from tensorflow.python.keras.constraints import max_norm
 
 # Crearea unui model secvential care va fi antrenat de date.
-# Modelul va avea 78 --> 39 --> 19--> 1 output neuron.
+# Modelul va avea (nr coloane=)78 --> 39 --> 19--> 1 output neuron.
 
 model = Sequential()
 
@@ -375,7 +374,7 @@ model.add(Dense(19, activation='relu'))
 model.add(Dropout(0.2))
 
 # output layer
-model.add(Dense(units=1,activation='sigmoid'))
+model.add(Dense(units=1,activation='sigmoid')) #pt a avea val 0-1
 
 # Compilare model
 model.compile(loss='binary_crossentropy', optimizer='adam')#binary clasification
@@ -387,13 +386,12 @@ print(X_train.shape)
 
 model.fit(x=X_train, 
   y=y_train, 
-  epochs=5,
+  epochs=25,
   batch_size=256,
   validation_data=(X_test, y_test), 
-)
+) 
 
-from tensorflow.python.keras.models import load_model
-model.save('tmwa_project_model.h5')  
+#____Evaluarea performantei modelului__________________________________________________________________________________________________________________________________________________________________________________
 
 # ---------------Evaluarea performantei modelului--------------------
 #  Reprezentare validation loss versus training loss
@@ -416,7 +414,7 @@ confusion_matrix(y_test,predictions)
 # Avand acest client, i se va oferi acestuia creditul?
 import random
 random.seed(101)
-random_ind = random.randint(0,len(df))
+random_ind = random.randint(0,len(df)) #index random
 
 new_customer = df.drop('loan_repaid',axis=1).iloc[random_ind]
 print('New customer: ', new_customer)
